@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="http://d3js.org/d3.v7.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <script>
+    let x = circleToCircleDistance = 20;
+    let offset = 50;
+    let alphabet = 'abcdefghijklmno';
+    function drawGrid(svg) {
+      svg.selectAll("circle")
+        .data(dataset)
+        .enter()
+        .append("circle")
+        .attr("cx", (d) => d[0] * circleToCircleDistance + offset)
+        .attr("cy", (d) => d[1] * circleToCircleDistance + offset)
+        .attr("r", 5)
+        .append("label")
+        .text(alphabet[(d) => d[0]])
+        .attr("x", (d) => d[0] * circleToCircleDistance + offset)
+        .attr("y", offset);
+    }
+
+
+    function moveEast(svg) {
+      svg.selectAll("circle")
+        .transition()
+        .duration(1000)
+        .attr("cx", function () { return d3.select(this).attr("cx") - circleToCircleDistance })
+        .transition()
+        .filter(function () {
+          return (d3.select(this).attr("cx") == offset) ||
+            (includesPair(islands, coordinateToPosition(d3.select(this).attr("cx") + 20), coordinateToPosition(d3.select(this).attr("cy"))))
+        })
+        .duration(2000)
+        .attr("r", 0.1)
+        .remove();
+
+    }
+    function includesPair(toCheckIn, first, second) {
+      for (let i = 0; i < islands.length; i++)
+        if (toCheckIn[i][0] == first && toCheckIn[i][1] == second) {
+          return true;
+        }
+      return false;
+    }
+    function coordinateToPosition(c) { return (c - 50) / 20; }
+    function positionToCoordinate(position) { return position * 20 + 50; }
+    dataset = [];
+    islands = [
+      [3, 3],
+      [10, 5],
+      [10, 6]
+    ]
+    for (let i = 0; i < 15; i++)
+      for (let j = 0; j < 15; j++)
+        if (!includesPair(islands, i, j))
+          dataset.push([i, j]);
+
+    const w = 500;
+    const h = 500;
+    const xScale = d3.scaleLinear()
+      .domain([0, d3.max(dataset, (d) => d[0])])
+      .range([offset, offset + circleToCircleDistance * 14]);
+
+    const yScale = d3.scaleLinear()
+      .domain([0, d3.max(dataset, (d) => d[1])])
+      .range([h - offset, offset]);
+
+    const svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h);
+    xAxis = d3.axisTop(xScale);
+    svg.append("g")
+      .attr("transform", "translate(0," + circleToCircleDistance + ")")
+      .call(xAxis);
+
+    drawGrid(svg);
+    svg.append("rect")
+      .attr("x", 50)
+      .attr("y", 400)
+      .attr("width", 100)
+      .attr("height", 100)
+      .on("click", function(){moveEast(svg)});
+
+
+
+  </script>
+</body>
+
+</html>
