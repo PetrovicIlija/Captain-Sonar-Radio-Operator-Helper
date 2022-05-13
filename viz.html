@@ -29,16 +29,7 @@
       svg.selectAll("circle")
         .transition()
         .duration(1000)
-        .attr("cx", function () { return d3.select(this).attr("cx") - circleToCircleDistance })
-        .transition()
-        .filter(function () {
-          return (d3.select(this).attr("cx") == offset) ||
-            (includesPair(islands, coordinateToPosition(d3.select(this).attr("cx") + 20), coordinateToPosition(d3.select(this).attr("cy"))))
-        })
-        .duration(2000)
-        .attr("r", 0.1)
-        .remove();
-
+        .attr("cx", function () { return d3.select(this).attr("cx") - circleToCircleDistance });
     }
     function includesPair(toCheckIn, first, second) {
       for (let i = 0; i < islands.length; i++)
@@ -49,6 +40,17 @@
     }
     function coordinateToPosition(c) { return (c - 50) / 20; }
     function positionToCoordinate(position) { return position * 20 + 50; }
+    function eraseDots(svg) {
+      svg.selectAll("circle")
+        .transition()
+        .filter(function () {
+          return (d3.select(this).attr("cx") < offset) ||
+            (includesPair(islands, coordinateToPosition(d3.select(this).attr("cx")), coordinateToPosition(d3.select(this).attr("cy"))))
+        })
+        .duration(2000)
+        .attr("r", 0.1)
+        .remove();
+    }
     dataset = [];
     islands = [
       [3, 3],
@@ -85,7 +87,15 @@
       .attr("y", 400)
       .attr("width", 100)
       .attr("height", 100)
-      .on("click", function(){moveEast(svg)});
+      .on("click", function () { moveEast(svg) });
+    svg.append("rect")
+      .attr("x", 170)
+      .attr("y", 400)
+      .attr("width", 100)
+      .attr("height", 100)
+      .attr("fill", "green")
+      .on("click", function () { eraseDots(svg) });
+
 
 
 
