@@ -20,7 +20,6 @@
     let movementDirectionSquareSize = 40;
     compassNorthX = 150;
     compassNorthY = 370;
-    let alphabet = 'abcdefghijklmno';
     function drawGrid(svg) {
       svg.selectAll("circle")
         .data(dataset)
@@ -28,11 +27,11 @@
         .append("circle")
         .attr("cx", (d) => d[0] * circleToCircleDistance + offset)
         .attr("cy", (d) => d[1] * circleToCircleDistance + offset)
-        .attr("r", 5)
-        .append("label")
+        .attr("r", 5);
+        /* .append("label")
         .text(alphabet[(d) => d[0]])
         .attr("x", (d) => d[0] * circleToCircleDistance + offset)
-        .attr("y", offset);
+        .attr("y", offset); */
     }
 
 
@@ -131,17 +130,35 @@
 
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(dataset, (d) => d[1])])
-      .range([h - offset, offset]);
+      .range([offset, offset + circleToCircleDistance * 14]);
 
     const svg = d3.select("body")
       .append("svg")
       .attr("width", w)
       .attr("height", h);
-    xAxis = d3.axisTop(xScale);
+    /* var xAxis = d3.axisTop(xScale)
+    var yAxis = d3.axisLeft(yScale);
     svg.append("g")
       .attr("transform", "translate(0," + circleToCircleDistance + ")")
       .call(xAxis);
-
+      svg.append("g")
+      .attr("transform", "translate(20, 0)")
+      .call(yAxis); */
+      svg.selectAll("text")
+        .data("ABCDEFGHOJKLMNO")
+        .enter()
+        .append("text")
+        .text((d)=>d)
+        .attr("x", (d, i) => i * circleToCircleDistance + offset - 6.5)
+        .attr("y", 20);
+      svg.selectAll("g")
+        .data([1,2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+        .enter()
+        .append("text")
+        .text((d)=>d)
+        .attr("x", 8)
+        .attr("y", (d) => (d-1) * circleToCircleDistance + offset + 5);
+        
     drawGrid(svg);
     north = svg.append("rect")
       .attr("x", compassNorthX)
