@@ -6,9 +6,20 @@
 </head>
 
 <body>
+  <div class="slidecontainer">
+    <input type="range" min="1" max="3" value="1" class="slider" id="rangeSonarType"
+      oninput="onChangedSonarType(this.value)">
+    <input type="text" placeholder="A 11" id="inputSonar">
+  </div>
+
   <script>
     let x = circleToCircleDistance = 20;
     let offset = 50;
+    let dotsMovementDuration = 500;
+    let dotsErasingDuration = 500;
+    let movementDirectionSquareSize = 40;
+    compassNorthX = 150;
+    compassNorthY = 370;
     let alphabet = 'abcdefghijklmno';
     function drawGrid(svg) {
       svg.selectAll("circle")
@@ -25,11 +36,49 @@
     }
 
 
+    function moveWest(svg) {
+      svg.selectAll("circle")
+        .transition()
+        .duration(dotsMovementDuration)
+        .attr("cx", function () { return d3.select(this).attr("cx") - circleToCircleDistance })
+        .on("end", (d, i) => {
+          if (i == d3.selectAll("circle").size() - 1) {
+            eraseDots(svg);
+          }
+        });
+    }
+    function moveNorth(svg) {
+      svg.selectAll("circle")
+        .transition()
+        .duration(dotsMovementDuration)
+        .attr("cy", function () { return d3.select(this).attr("cy") - circleToCircleDistance })
+        .on("end", (d, i) => {
+          if (i == d3.selectAll("circle").size() - 1) {
+            eraseDots(svg);
+          }
+        });
+    }
+    function moveSouth(svg) {
+      svg.selectAll("circle")
+        .transition()
+        .duration(dotsMovementDuration)
+        .attr("cy", function (d, i) { return parseInt(d3.select(this).attr("cy")) + circleToCircleDistance })
+        .on("end", (d, i) => {
+          if (i == d3.selectAll("circle").size() - 1) {
+            eraseDots(svg);
+          }
+        });
+    }
     function moveEast(svg) {
       svg.selectAll("circle")
         .transition()
-        .duration(1000)
-        .attr("cx", function () { return d3.select(this).attr("cx") - circleToCircleDistance });
+        .duration(dotsMovementDuration)
+        .attr("cx", function () { return parseInt(d3.select(this).attr("cx")) + circleToCircleDistance })
+        .on("end", (d, i) => {
+          if (i == d3.selectAll("circle").size() - 1) {
+            eraseDots(svg);
+          }
+        });
     }
     function includesPair(toCheckIn, first, second) {
       for (let i = 0; i < islands.length; i++)
@@ -45,11 +94,23 @@
         .transition()
         .filter(function () {
           return (d3.select(this).attr("cx") < offset) ||
+            (d3.select(this).attr("cy") < offset) ||
+            (d3.select(this).attr("cx") > offset + circleToCircleDistance * 14) ||
+            (d3.select(this).attr("cy") > offset + circleToCircleDistance * 14) ||
             (includesPair(islands, coordinateToPosition(d3.select(this).attr("cx")), coordinateToPosition(d3.select(this).attr("cy"))))
         })
-        .duration(2000)
+        .duration(dotsErasingDuration)
         .attr("r", 0.1)
         .remove();
+    }
+    function onChangedSonarType(type) {
+      if (type == 1)
+        document.getElementById("inputSonar").placeholder = "A 11"
+      else if (type == 2)
+        document.getElementById("inputSonar").placeholder = "A 5"
+      else
+        document.getElementById("inputSonar").placeholder = "11 5"
+
     }
     dataset = [];
     islands = [
@@ -62,7 +123,7 @@
         if (!includesPair(islands, i, j))
           dataset.push([i, j]);
 
-    const w = 500;
+    const w = 800;
     const h = 500;
     const xScale = d3.scaleLinear()
       .domain([0, d3.max(dataset, (d) => d[0])])
@@ -82,19 +143,39 @@
       .call(xAxis);
 
     drawGrid(svg);
-    svg.append("rect")
-      .attr("x", 50)
-      .attr("y", 400)
-      .attr("width", 100)
-      .attr("height", 100)
+    north = svg.append("rect")
+      .attr("x", compassNorthX)
+      .attr("y", compassNorthY)
+      .attr("width", movementDirectionSquareSize)
+      .attr("height", movementDirectionSquareSize)
+      .attr("fill", "lightblue")
+      .text("West")
+      .on("click", function () { moveNorth(svg) });
+    west = svg.append("rect")
+      .attr("x", compassNorthX - 40)
+      .attr("y", compassNorthY + 40)
+      .attr("width", movementDirectionSquareSize)
+      .attr("height", movementDirectionSquareSize)
+      .attr("fill", "lightblue")
+      .on("click", function () { moveWest(svg) });
+    east = svg.append("rect")
+      .attr("x", compassNorthX + 40)
+      .attr("y", compassNorthY + 40)
+      .attr("width", movementDirectionSquareSize)
+      .attr("height", movementDirectionSquareSize)
+      .attr("fill", "lightblue")
       .on("click", function () { moveEast(svg) });
-    svg.append("rect")
-      .attr("x", 170)
-      .attr("y", 400)
-      .attr("width", 100)
-      .attr("height", 100)
-      .attr("fill", "green")
-      .on("click", function () { eraseDots(svg) });
+    south = svg.append("rect")
+      .attr("x", compassNorthX)
+      .attr("y", compassNorthY + 80)
+      .attr("width", movementDirectionSquareSize)
+      .attr("height", movementDirectionSquareSize)
+      .attr("fill", "lightblue")
+      .on("click", function () { moveSouth(svg) });
+    svg.append("text")
+      .attr("x", compassNorthX)
+      .attr("y", compassNorthY + 60)
+      .text("move")
 
 
 
