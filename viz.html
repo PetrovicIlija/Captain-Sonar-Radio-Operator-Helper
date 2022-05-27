@@ -10,7 +10,8 @@
     <input type="range" min="1" max="3" value="1" class="slider" id="rangeSonarType"
       oninput="onChangedSonarType(this.value)">
     <input type="text" placeholder="column row" id="inputSonar">
-    <button onclick="eraseDotsUsingSonar()">Use sonar info</button>
+    <button onclick="eraseDotsUsingSonar()">Use sonar info!</button>
+    <button onclick="silenceUsed()">Silence used!</button>
   </div>
 
   <script>
@@ -27,8 +28,8 @@
         .data(dataset)
         .enter()
         .append("circle")
-        .attr("cx", (d) => d[0] * circleToCircleDistance + offset)
-        .attr("cy", (d) => d[1] * circleToCircleDistance + offset)
+        .attr("cx", (d) => positionToCoordinate(d[0]))
+        .attr("cy", (d) => positionToCoordinate(d[1]))
         .attr("r", 5);
       /* .append("label")
       .text(alphabet[(d) => d[0]])
@@ -113,19 +114,18 @@
         document.getElementById("inputSonar").placeholder = "row sector"
 
     }
-  
 
 
 
-    function drawIslands(svg){
-      for (let i = 0; i < islands.length; i++)
-      {
+
+    function drawIslands(svg) {
+      for (let i = 0; i < islands.length; i++) {
         svg.append("rect")
-      .attr("x", positionToCoordinate(islands[i][0]) - circleToCircleDistance/2)
-      .attr("y", positionToCoordinate(islands[i][1])- circleToCircleDistance/2)
-      .attr("width", circleToCircleDistance)
-      .attr("height", circleToCircleDistance)
-      .attr("fill", "green")
+          .attr("x", positionToCoordinate(islands[i][0]) - circleToCircleDistance / 2)
+          .attr("y", positionToCoordinate(islands[i][1]) - circleToCircleDistance / 2)
+          .attr("width", circleToCircleDistance)
+          .attr("height", circleToCircleDistance)
+          .attr("fill", "green")
       }
     }
 
@@ -173,16 +173,23 @@
           .transition()
           .filter(function () {
             return !((
-                parseInt(d3.select(this).attr("cx")) >= positionToCoordinate((sector % 3) * 5) &&
-                parseInt(d3.select(this).attr("cx")) <= positionToCoordinate((sector % 3) * 5 + 5) &&
-                parseInt(d3.select(this).attr("cy")) >= positionToCoordinate(Math.floor(sector / 3) * 5) &&
-                parseInt(d3.select(this).attr("cy")) <= positionToCoordinate(Math.floor(sector / 3) * 5 + 5)
-              )|| parseInt(d3.select(this).attr("cy")) == y)
+              parseInt(d3.select(this).attr("cx")) >= positionToCoordinate((sector % 3) * 5) &&
+              parseInt(d3.select(this).attr("cx")) <= positionToCoordinate((sector % 3) * 5 + 5) &&
+              parseInt(d3.select(this).attr("cy")) >= positionToCoordinate(Math.floor(sector / 3) * 5) &&
+              parseInt(d3.select(this).attr("cy")) <= positionToCoordinate(Math.floor(sector / 3) * 5 + 5)
+            ) || parseInt(d3.select(this).attr("cy")) == y)
           })
           .duration(dotsErasingDuration)
           .attr("r", 0.1)
           .remove();
       }
+    }
+    function silenceUsed() {
+      svg.selectAll("circle")
+      .append("circle")
+      .attr("cx", parseInt(d3.select(this).attr("cx")) + circleToCircleDistance)
+      .attr("cy", parseInt(d3.select(this).attr("cx")))
+      .attr("r", 5);
     }
     dataset = [];
     islands = [
@@ -190,9 +197,13 @@
       [10, 5],
       [10, 6],
       [4, 6],
-      [1, 11]
+      [1, 11],
+      [2, 6],
+      [11, 10],
+      [14, 13],
+      [14, 12]
     ]
-   
+
     for (let i = 0; i < 15; i++)
       for (let j = 0; j < 15; j++)
         if (!includesPair(islands, i, j))
@@ -235,8 +246,9 @@
       .attr("x", 8)
       .attr("y", (d) => (d - 1) * circleToCircleDistance + offset + 5);
 
-    drawGrid(svg);
+
     drawIslands(svg);
+    drawGrid(svg);
     north = svg.append("rect")
       .attr("x", compassNorthX)
       .attr("y", compassNorthY)
