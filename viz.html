@@ -6,10 +6,11 @@
 </head>
 
 <body>
-  <div class="slidecontainer">
+  <div class="sonarDiv">
     <input type="range" min="1" max="3" value="1" class="slider" id="rangeSonarType"
       oninput="onChangedSonarType(this.value)">
-    <input type="text" placeholder="A 11" id="inputSonar">
+    <input type="text" placeholder="column row" id="inputSonar">
+    <button onclick="eraseDotsUsingSonar()">Use sonar info</button>
   </div>
 
   <script>
@@ -18,6 +19,7 @@
     let dotsMovementDuration = 500;
     let dotsErasingDuration = 500;
     let movementDirectionSquareSize = 40;
+    let alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O']
     compassNorthX = 150;
     compassNorthY = 370;
     function drawGrid(svg) {
@@ -28,10 +30,10 @@
         .attr("cx", (d) => d[0] * circleToCircleDistance + offset)
         .attr("cy", (d) => d[1] * circleToCircleDistance + offset)
         .attr("r", 5);
-        /* .append("label")
-        .text(alphabet[(d) => d[0]])
-        .attr("x", (d) => d[0] * circleToCircleDistance + offset)
-        .attr("y", offset); */
+      /* .append("label")
+      .text(alphabet[(d) => d[0]])
+      .attr("x", (d) => d[0] * circleToCircleDistance + offset)
+      .attr("y", offset); */
     }
 
 
@@ -104,19 +106,93 @@
     }
     function onChangedSonarType(type) {
       if (type == 1)
-        document.getElementById("inputSonar").placeholder = "A 11"
+        document.getElementById("inputSonar").placeholder = "column row"
       else if (type == 2)
-        document.getElementById("inputSonar").placeholder = "A 5"
+        document.getElementById("inputSonar").placeholder = "column sector"
       else
-        document.getElementById("inputSonar").placeholder = "11 5"
+        document.getElementById("inputSonar").placeholder = "row sector"
 
+    }
+  
+
+
+
+    function drawIslands(svg){
+      for (let i = 0; i < islands.length; i++)
+      {
+        svg.append("rect")
+      .attr("x", positionToCoordinate(islands[i][0]) - circleToCircleDistance/2)
+      .attr("y", positionToCoordinate(islands[i][1])- circleToCircleDistance/2)
+      .attr("width", circleToCircleDistance)
+      .attr("height", circleToCircleDistance)
+      .attr("fill", "green")
+      }
+    }
+
+    function eraseDotsUsingSonar() {
+      var slider = document.getElementById("rangeSonarType");
+      const sonarValues = document.getElementById("inputSonar").value.split(" ");
+      if (slider.value == 1) {
+        let x = positionToCoordinate(alphabet.indexOf(sonarValues[0]));
+        let y = positionToCoordinate(parseInt(sonarValues[1]) - 1);
+        svg.selectAll("circle")
+          .transition()
+          .filter(function () {
+            return !(d3.select(this).attr("cx") == x || d3.select(this).attr("cy") == y)
+          })
+          .duration(dotsErasingDuration)
+          .attr("r", 0.1)
+          .remove();
+      }
+      else if (slider.value == 2) {
+        let x = positionToCoordinate(alphabet.indexOf(sonarValues[0]));
+        let sector = sonarValues[1] - 1;
+        svg.selectAll("circle")
+          .transition()
+          .filter(function () {
+            console.log(x);
+            return !(d3.select(this).attr("cx") == x ||
+              (
+                parseInt(d3.select(this).attr("cx")) >= positionToCoordinate((sector % 3) * 5) &&
+                parseInt(d3.select(this).attr("cx")) <= positionToCoordinate((sector % 3) * 5 + 5) &&
+                parseInt(d3.select(this).attr("cy")) >= positionToCoordinate(Math.floor(sector / 3) * 5) &&
+                parseInt(d3.select(this).attr("cy")) <= positionToCoordinate(Math.floor(sector / 3) * 5 + 5)
+              )
+            )
+          }
+          )
+
+          .duration(dotsErasingDuration)
+          .attr("r", 0.1)
+          .remove();
+      }
+      else {
+        let y = positionToCoordinate(parseInt(sonarValues[0]) - 1);
+        let sector = sonarValues[1] - 1;
+        svg.selectAll("circle")
+          .transition()
+          .filter(function () {
+            return !((
+                parseInt(d3.select(this).attr("cx")) >= positionToCoordinate((sector % 3) * 5) &&
+                parseInt(d3.select(this).attr("cx")) <= positionToCoordinate((sector % 3) * 5 + 5) &&
+                parseInt(d3.select(this).attr("cy")) >= positionToCoordinate(Math.floor(sector / 3) * 5) &&
+                parseInt(d3.select(this).attr("cy")) <= positionToCoordinate(Math.floor(sector / 3) * 5 + 5)
+              )|| parseInt(d3.select(this).attr("cy")) == y)
+          })
+          .duration(dotsErasingDuration)
+          .attr("r", 0.1)
+          .remove();
+      }
     }
     dataset = [];
     islands = [
       [3, 3],
       [10, 5],
-      [10, 6]
+      [10, 6],
+      [4, 6],
+      [1, 11]
     ]
+   
     for (let i = 0; i < 15; i++)
       for (let j = 0; j < 15; j++)
         if (!includesPair(islands, i, j))
@@ -144,22 +220,23 @@
       svg.append("g")
       .attr("transform", "translate(20, 0)")
       .call(yAxis); */
-      svg.selectAll("text")
-        .data("ABCDEFGHOJKLMNO")
-        .enter()
-        .append("text")
-        .text((d)=>d)
-        .attr("x", (d, i) => i * circleToCircleDistance + offset - 6.5)
-        .attr("y", 20);
-      svg.selectAll("g")
-        .data([1,2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
-        .enter()
-        .append("text")
-        .text((d)=>d)
-        .attr("x", 8)
-        .attr("y", (d) => (d-1) * circleToCircleDistance + offset + 5);
-        
+    svg.selectAll("text")
+      .data("ABCDEFGHOJKLMNO")
+      .enter()
+      .append("text")
+      .text((d) => d)
+      .attr("x", (d, i) => i * circleToCircleDistance + offset - 6.5)
+      .attr("y", 20);
+    svg.selectAll("g")
+      .data([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+      .enter()
+      .append("text")
+      .text((d) => d)
+      .attr("x", 8)
+      .attr("y", (d) => (d - 1) * circleToCircleDistance + offset + 5);
+
     drawGrid(svg);
+    drawIslands(svg);
     north = svg.append("rect")
       .attr("x", compassNorthX)
       .attr("y", compassNorthY)
