@@ -105,9 +105,12 @@
     function positionToCoordinate(position) { return position * 20 + 50; }
     function eraseDots(svg, dataset) {
       for (let i = 0; i < dataset.length; i++) {
-        if (dataset[i][0] < 0 || dataset[i][0] > 14 || dataset[i][1] < 0 || dataset[i][1] > 14 || includesPair(islands, dataset[i][0], dataset[i][1]))
+        if (dataset[i][0] < 0 || dataset[i][0] > 14 || dataset[i][1] < 0 || dataset[i][1] > 14 || includesPair(islands, dataset[i][0], dataset[i][1])) {
           dataset.splice(i, 1);
+          i--;
+        }
       }
+      console.log(dataset);
       svg.selectAll("circle")
         .transition()
         .filter(function () {
@@ -159,9 +162,16 @@
           .duration(dotsErasingDuration)
           .attr("r", 0.1)
           .remove();
-        for (let i = 0; i < dataset.length; i++)
-          if (!(dataset[i][0] == coordinateToPosition(x)  || dataset[i][1] == coordinateToPosition(y)))
-            dataset.splice(dataset[i], 1);
+        //let toDelete = [];
+        for (let i = 0; i < dataset.length; i++) {
+          if (!(dataset[i][0] == coordinateToPosition(x) || dataset[i][1] == coordinateToPosition(y))) {
+            dataset.splice(i, 1);
+            i--;
+          }
+        }
+
+        /* for (let i = 0; i < toDelete.length; i++)
+          dataset.splice(toDelete[i], 1);*/
         console.log(dataset);
       }
 
@@ -206,12 +216,13 @@
           .duration(dotsErasingDuration)
           .attr("r", 0.1)
           .remove();
-          for (let i = 0; i < dataset.length; i++)
+        for (let i = 0; i < dataset.length; i++)
           if (!(dataset[i][1] == y || (dataset[i][0] >= (sector % 3) * 5 && dataset[i][0] <= (sector % 3) * 5 + 5 && dataset[i][1] >= Math.floor(sector / 3) * 5 && dataset[i][1] <= sector / 3) * 5 + 5))
             dataset.splice(dataset[i], 1);
       }
     }
     function silenceUsed() {
+      console.log(dataset);
       svg.selectAll("circle")
         .transition()
         .duration(dotsErasingDuration)
@@ -224,8 +235,32 @@
           if (includesPair(islands, toIterate[i][0] + j, toIterate[i][1])) {
             break;
           }
-          else
+          else if (!dataset.includes([toIterate[i][0] + j, toIterate[i][1]]))
             dataset.push([toIterate[i][0] + j, toIterate[i][1]]);
+        }
+      for (let i = 0; i < length; i++)
+        for (let j = 1; j < 5; j++) {
+          if (includesPair(islands, toIterate[i][0] - j, toIterate[i][1])) {
+            break;
+          }
+          else if (!dataset.includes([toIterate[i][0] - j, toIterate[i][1]]))
+            dataset.push([toIterate[i][0] - j, toIterate[i][1]]);
+        }
+      for (let i = 0; i < length; i++)
+        for (let j = 1; j < 5; j++) {
+          if (includesPair(islands, toIterate[i][0], toIterate[i][1] + j)) {
+            break;
+          }
+          else if (!dataset.includes([toIterate[i][0], toIterate[i][1] + j]))
+            dataset.push([toIterate[i][0], toIterate[i][1] + j]);
+        }
+      for (let i = 0; i < length; i++)
+        for (let j = 1; j < 5; j++) {
+          if (includesPair(islands, toIterate[i][0], toIterate[i][1] - j)) {
+            break;
+          }
+          else if (!dataset.includes([toIterate[i][0], toIterate[i][1] - j]))
+            dataset.push([toIterate[i][0], toIterate[i][1] - j]);
         }
       drawGrid(svg, dataset);
       eraseDots(svg, dataset);
