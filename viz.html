@@ -23,6 +23,7 @@
     let alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O']
     compassNorthX = 150;
     compassNorthY = 370;
+    let circleRadius = 7;
     function drawGrid(svg, dataset) {
       svg.selectAll("circle")
         .data(dataset)
@@ -30,14 +31,25 @@
         .append("circle")
         .attr("cx", (d) => positionToCoordinate(d[0]))
         .attr("cy", (d) => positionToCoordinate(d[1]))
-        .attr("r", 5);
+        .attr("r", circleRadius)
+        .on("click", (e, d) =>eraseDot(positionToCoordinate(d[0]), positionToCoordinate(d[1])));
       /* .append("label")
       .text(alphabet[(d) => d[0]])
       .attr("x", (d) => d[0] * circleToCircleDistance + offset)
       .attr("y", offset); */
     }
 
-
+    function eraseDot(x, y){
+      console.log(x, y);
+      svg.selectAll("circle")
+        .transition()
+        .filter(function () {
+          return (d3.select(this).attr("cx") == x && d3.select(this).attr("cy") == y);
+        })
+        .duration(dotsErasingDuration / 2)
+        .attr("r", 0.1)
+        .remove();
+    }
     function moveWest(svg, dataset) {
       for (let i = 0; i < dataset.length; i++) {
         dataset[i][0]--;
