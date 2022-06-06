@@ -170,7 +170,7 @@
     function eraseDotsUsingSonar() {
       var slider = document.getElementById("sonarType");
       const sonarValues = document.getElementById("inputSonar").value.split(" ");
-      if(sonarValues.length < 2)
+      if(sonarValues.length < 2 || sonarValues.length > 2)
         return alert("Invalid input");
       if (slider.value == "column row") {
         let x = positionToCoordinate(alphabet.indexOf(sonarValues[0]));
