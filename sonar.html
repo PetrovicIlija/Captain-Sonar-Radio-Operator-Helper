@@ -40,14 +40,9 @@
         .on("click", (e, d) => eraseDot(positionToCoordinate(d[0]), positionToCoordinate(d[1])))
         .on("mouseover", (e, d) => document.getElementById("currentCoordinates").innerHTML = "Current coordinates: " + alphabet[(d[0])] + " " + parseInt(d[1] + 1))
         .on("mouseleave", (e) => document.getElementById("currentCoordinates").innerHTML = "Current coordinates: ");
-      /* .append("label")
-      .text(alphabet[(d) => d[0]])
-      .attr("x", (d) => d[0] * circleToCircleDistance + offset)
-      .attr("y", offset); */
     }
 
     function eraseDot(x, y) {
-      console.log(x, y);
       svg.selectAll("circle")
         .transition()
         .filter(function () {
@@ -129,7 +124,6 @@
           i--;
         }
       }
-      console.log(dataset);
       svg.selectAll("circle")
         .transition()
         .filter(function () {
@@ -183,17 +177,12 @@
           .duration(dotsErasingDuration)
           .attr("r", 0.1)
           .remove();
-        //let toDelete = [];
         for (let i = 0; i < dataset.length; i++) {
           if (!(dataset[i][0] == coordinateToPosition(x) || dataset[i][1] == coordinateToPosition(y))) {
             dataset.splice(i, 1);
             i--;
           }
         }
-
-        /* for (let i = 0; i < toDelete.length; i++)
-          dataset.splice(toDelete[i], 1);*/
-        console.log(dataset);
       }
 
       else if (slider.value == "column sector") {
@@ -202,7 +191,6 @@
         svg.selectAll("circle")
           .transition()
           .filter(function () {
-            console.log(x);
             return !(d3.select(this).attr("cx") == x ||
               (
                 parseInt(d3.select(this).attr("cx")) >= positionToCoordinate((sector % 3) * 5) &&
@@ -243,7 +231,6 @@
       }
     }
     function silenceUsed() {
-      console.log(dataset);
       svg.selectAll("circle")
         .transition()
         .duration(dotsErasingDuration)
@@ -318,14 +305,6 @@
       .append("svg")
       .attr("width", w)
       .attr("height", h);
-    /* var xAxis = d3.axisTop(xScale)
-    var yAxis = d3.axisLeft(yScale);
-    svg.append("g")
-      .attr("transform", "translate(0," + circleToCircleDistance + ")")
-      .call(xAxis);
-      svg.append("g")
-      .attr("transform", "translate(20, 0)")
-      .call(yAxis); */
     svg.selectAll("text")
       .data("ABCDEFGHOJKLMNO")
       .enter()
@@ -376,11 +355,7 @@
     svg.append("text")
       .attr("x", compassNorthX)
       .attr("y", compassNorthY + 60)
-      .text("move")
-
-
-
-
+      .text("move");
   </script>
 </body>
 
