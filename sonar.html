@@ -7,8 +7,12 @@
 
 <body>
   <div class="sonarDiv">
-    <input type="range" min="1" max="3" value="1" class="slider" id="rangeSonarType"
-      oninput="onChangedSonarType(this.value)">
+    <label>Sonar type:</label>
+    <select onchange=sonarTypeChanged() name="sonarType" id="sonarType">
+      <option value="column row">column row</option>
+      <option value="column sector">column sector</option>
+      <option value="row sector">row sector</option>
+    </select>
     <input type="text" placeholder="column row" id="inputSonar">
     <button onclick="eraseDotsUsingSonar()">Use sonar info!</button>
     <button onclick="silenceUsed()">Silence used!</button>
@@ -35,6 +39,7 @@
         .attr("r", circleRadius)
         .on("click", (e, d) => eraseDot(positionToCoordinate(d[0]), positionToCoordinate(d[1])))
         .on("mouseover", (e, d) => document.getElementById("currentCoordinates").innerHTML = "Current coordinates: " + alphabet[(d[0])] + " " + parseInt(d[1] + 1))
+        .on("mouseleave", (e) => document.getElementById("currentCoordinates").innerHTML = "Current coordinates: ");
       /* .append("label")
       .text(alphabet[(d) => d[0]])
       .attr("x", (d) => d[0] * circleToCircleDistance + offset)
@@ -138,10 +143,10 @@
         .attr("r", 0.1)
         .remove();
     }
-    function onChangedSonarType(type) {
-      if (type == 1)
+    function sonarTypeChanged() {
+      if (document.getElementById("sonarType").value == "column row")
         document.getElementById("inputSonar").placeholder = "column row"
-      else if (type == 2)
+      else if (document.getElementById("sonarType").value == "column sector")
         document.getElementById("inputSonar").placeholder = "column sector"
       else
         document.getElementById("inputSonar").placeholder = "row sector"
@@ -163,9 +168,11 @@
     }
 
     function eraseDotsUsingSonar() {
-      var slider = document.getElementById("rangeSonarType");
+      var slider = document.getElementById("sonarType");
       const sonarValues = document.getElementById("inputSonar").value.split(" ");
-      if (slider.value == 1) {
+      if(sonarValues.length < 2)
+        return alert("Invalid input");
+      if (slider.value == "column row") {
         let x = positionToCoordinate(alphabet.indexOf(sonarValues[0]));
         let y = positionToCoordinate(parseInt(sonarValues[1]) - 1);
         svg.selectAll("circle")
@@ -189,7 +196,7 @@
         console.log(dataset);
       }
 
-      else if (slider.value == 2) {
+      else if (slider.value == "column sector") {
         let x = positionToCoordinate(alphabet.indexOf(sonarValues[0]));
         let sector = sonarValues[1] - 1;
         svg.selectAll("circle")
